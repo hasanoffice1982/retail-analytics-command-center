@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv
+.env
+.pytest_cache/
+.streamlit/secrets.toml
+.DS_Store
+data/raw/*
+!data/raw/.gitkeep
+# Step 3: remove the next two lines when you deploy, so the small parquet is committed
+data/processed/*
+!data/processed/.gitkeep
