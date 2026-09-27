@@ -10,7 +10,13 @@ from src import config
 
 def _log(report: list[dict], step: str, before: int, after: int, why: str) -> None:
     report.append(
-        {"step": step, "rows_before": before, "rows_after": after, "rationale": why}
+        {
+            "step": step,
+            "rows_before": before,
+            "rows_after": after,
+            "rows_removed": before - after,
+            "rationale": why,
+        }
     )
 
 

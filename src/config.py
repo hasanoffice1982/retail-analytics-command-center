@@ -34,6 +34,7 @@ REQUIRED_COLUMNS = (
 
 # --- Cleaning rules ------------------------------------------------------
 CANCELLATION_PREFIX = "C"
+
 NON_PRODUCT_CODES = (
     "POST",
     "D",

@@ -67,3 +67,11 @@ def load_raw(path: Path | None = None) -> pd.DataFrame:
     return df
 
 
+def load_processed() -> pd.DataFrame:
+    """Load the analysis dataset created by scripts/build_dataset.py."""
+    if not config.PROCESSED_FILE.exists():
+        raise FileNotFoundError(
+            f"Processed data not found at {config.PROCESSED_FILE}. "
+            "Run: python scripts/build_dataset.py"
+        )
+    return pd.read_parquet(config.PROCESSED_FILE)
