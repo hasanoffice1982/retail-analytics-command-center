@@ -5,5 +5,4 @@ plotly
 statsmodels
 scikit-learn
 pyarrow
-openpyxl
 pytest
