@@ -4,9 +4,6 @@ from src import config
 
 st.set_page_config(page_title="Retail Analytics Command Center", page_icon="📊", layout="wide")
 
-# Global control styling (injected once, applies to every page): segmented
-# controls become one rounded track with the active pill filled in the brand
-# colour; toggle/checkbox/radio labels are larger; KPI numbers fit their column.
 st.markdown(
     f"""
     <style>
@@ -58,4 +55,6 @@ pages = [
     st.Page("views/overview.py", title="Overview", icon="🏠", default=True),
     st.Page("views/sales_analytics.py", title="Sales Analytics", icon="📊"),
 ]
+
+
 st.navigation(pages).run()

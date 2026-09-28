@@ -9,3 +9,4 @@ venv
 data/raw/*
 !data/raw/.gitkeep
 # data/processed/ is committed on purpose: the deployed app reads retail_clean.parquet
+acf_pacf.png
