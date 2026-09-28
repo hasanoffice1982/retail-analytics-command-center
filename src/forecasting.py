@@ -74,27 +74,50 @@ def seasonal_naive_forecast(train: pd.Series, test: pd.Series, season: int = 7) 
     return forcast
 
 
-def evaluate_forecast(actual: pd.Series, predicted: pd.Series) -> dict:
+def evaluate_forecast(
+    actual: pd.Series, predicted: pd.Series, train: pd.Series | None = None, season: int = 7
+) -> dict:
     """
     Compare a forecast against actual values.
+
     Input:  actual (test set, ground truth), predicted (forecast, same index/length).
-    Output: dict with keys: 'mae', 'rmse', 'mape'.
+            train (optional): the training series, only needed to compute MASE.
+            season: the seasonal lag used for MASE's naive scale (7 = weekly).
+    Output: dict with keys: 'mae', 'rmse', 'mape', 'wape', and 'mase' (only if
+            `train` is given).
+
+    MAPE divides by each day's actual value, so it is undefined (and here
+    excluded) on zero-revenue days, and it overweights low-revenue days.
+    WAPE and MASE exist as alternatives that don't have that problem:
+
+    - WAPE (weighted/aggregate MAPE): sum of errors / sum of actuals, computed
+      once over the whole window instead of averaged per day. Zero-revenue
+      days no longer need special-casing individually.
+    - MASE (mean absolute scaled error): this forecast's MAE divided by the
+      MAE of a naive (t - season) forecast measured in-sample on `train`.
+      Well-defined regardless of zeros in `actual`. < 1 = beats the naive
+      baseline, > 1 = worse than it. See Hyndman & Koehler (2006).
     """
     errors = actual - predicted
     mae = np.mean(np.abs(errors))
     mse = np.mean(errors**2)
     rmse = np.sqrt(mse)
 
-    mask  = actual != 0
+    mask = actual != 0
     mape = np.mean(
         np.abs(actual[mask] - predicted[mask]) / actual[mask]
     ) * 100
 
-    return {
-        "mae": mae,
-        "rmse": rmse,
-        "mape": mape,
-    }
+    wape = np.sum(np.abs(errors)) / np.sum(np.abs(actual)) * 100
+
+    metrics = {"mae": mae, "rmse": rmse, "mape": mape, "wape": wape}
+
+    if train is not None:
+        naive_in_sample_errors = (train - train.shift(season)).dropna()
+        naive_scale = naive_in_sample_errors.abs().mean()
+        metrics["mase"] = mae / naive_scale if naive_scale else np.nan
+
+    return metrics
 
 
 def fit_sarima(train: pd.Series, order: tuple, seasonal_order: tuple):
