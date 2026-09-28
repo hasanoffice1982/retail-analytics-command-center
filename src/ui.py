@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-SALES_PAGE = "pages/sales_analytics.py"
+SALES_PAGE = "views/sales_analytics.py"
 
 
 def date_range_filter(dates: pd.Series) -> tuple[pd.Timestamp, pd.Timestamp]:

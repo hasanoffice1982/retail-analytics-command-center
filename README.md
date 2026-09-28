@@ -3,7 +3,7 @@
 A Streamlit analytics and forecasting platform built on the UCI Online Retail dataset.
 Modules: Sales Analytics, Sales Forecast (SARIMA), Stratified Sampling, DSE Stock Predictor, Portfolio Gallery.
 
-**Principle:** analysis logic lives in `src/` (no Streamlit code, testable). `pages/` only draws the UI.
+**Principle:** analysis logic lives in `src/` (no Streamlit code, testable). `views/` only draws the UI.
 
 ---
 
@@ -22,7 +22,7 @@ src/
   forecasting.py           weekly series, baseline, SARIMA, metrics
   sampling.py              stratified sampling logic
   stock_prediction.py      DSE features + model
-pages/                     one file per Streamlit page
+views/                     one file per Streamlit page
 scripts/build_dataset.py   raw -> processed
 tests/                     pytest
 models/  assets/screenshots/
@@ -74,13 +74,13 @@ Deploy after Step 0 and push after every step. Streamlit Community Cloud redeplo
 - [ ] Remove the `data/processed/*` lines from `.gitignore` so the parquet is committed (about 10 MB)
 - [ ] Push, so the cloud app has data
 
-### Step 4: `pages/overview.py`
+### Step 4: `views/overview.py`
 - [ ] Load parquet with `@st.cache_data`
 - [ ] KPI cards: revenue, orders, units, customers, AOV, countries (calculated, never hardcoded)
 - [ ] Show the cleaning report table
 - Live check: correct numbers on your public URL
 
-### Step 5: Sales Analytics (`src/analytics.py` + `pages/sales_analytics.py`)
+### Step 5: Sales Analytics (`src/analytics.py` + `views/sales_analytics.py`)
 - [ ] Filters: country, product, year, month, applied once to one filtered DataFrame
 - [ ] Monthly revenue line chart (Plotly)
 - [ ] Orders by month bar chart

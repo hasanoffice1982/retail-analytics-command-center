@@ -77,10 +77,12 @@ st.divider()
 
 # --- Charts (2x2 grid) ---------------------------------------------------
 monthly = analytics.monthly_revenue(filtered)
-top_n = st.radio("Top products: show", [5, 10, 20], horizontal=True, index=1)
+top_n = st.segmented_control(
+    "Top products: show", [5, 10, 20], default=10, format_func=lambda n: f"Top {n}", key="top_n"
+) or 10  # None when the active pill is clicked off
 top = analytics.top_products(analytics.apply_filters(base, countries=picked_countries), n=top_n).sort_values("Revenue")
 st.session_state.setdefault("exclude_uk", True)
-exclude_uk = st.checkbox("Exclude United Kingdom from country chart", key="exclude_uk")
+exclude_uk = st.toggle("Exclude United Kingdom from country chart", key="exclude_uk")
 by_country = analytics.revenue_by_country(
     analytics.apply_filters(base, products=picked_products), exclude_uk=exclude_uk
 )
