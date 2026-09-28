@@ -1,0 +1,51 @@
+[
+  {
+    "step": "raw",
+    "rows_before": 541909,
+    "rows_after": 541909,
+    "rows_removed": 0,
+    "rationale": "Untouched raw records"
+  },
+  {
+    "step": "unparseable_values",
+    "rows_before": 541909,
+    "rows_after": 541909,
+    "rows_removed": 0,
+    "rationale": "Missing/invalid date, quantity, price or IDs"
+  },
+  {
+    "step": "duplicates",
+    "rows_before": 541909,
+    "rows_after": 536641,
+    "rows_removed": 5268,
+    "rationale": "Exact duplicate records"
+  },
+  {
+    "step": "cancelled_invoices",
+    "rows_before": 536641,
+    "rows_after": 527390,
+    "rows_removed": 9251,
+    "rationale": "Invoices prefixed 'C'"
+  },
+  {
+    "step": "invalid_quantity",
+    "rows_before": 527390,
+    "rows_after": 526054,
+    "rows_removed": 1336,
+    "rationale": "Quantity <= 0"
+  },
+  {
+    "step": "invalid_price",
+    "rows_before": 526054,
+    "rows_after": 524878,
+    "rows_removed": 1176,
+    "rationale": "UnitPrice <= 0"
+  },
+  {
+    "step": "non_product_codes",
+    "rows_before": 524878,
+    "rows_after": 522709,
+    "rows_removed": 2169,
+    "rationale": "Postage, fees, manual adjustments"
+  }
+]

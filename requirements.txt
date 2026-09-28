@@ -1,8 +1,7 @@
-streamlit
-pandas
-numpy
-plotly
-statsmodels
-scikit-learn
-pyarrow
-pytest
+streamlit==1.64.0
+pandas==3.0.6
+numpy==2.5.3
+plotly==7.1.0
+statsmodels==0.15.0
+scikit-learn==1.9.1
+pyarrow==25.0.1

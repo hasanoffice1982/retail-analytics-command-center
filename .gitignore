@@ -8,6 +8,4 @@ venv
 .DS_Store
 data/raw/*
 !data/raw/.gitkeep
-# Step 3: remove the next two lines when you deploy, so the small parquet is committed
-data/processed/*
-!data/processed/.gitkeep
+# data/processed/ is committed on purpose: the deployed app reads retail_clean.parquet

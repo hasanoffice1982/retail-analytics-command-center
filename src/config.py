@@ -33,6 +33,12 @@ REQUIRED_COLUMNS = (
 )
 
 # --- Cleaning rules ------------------------------------------------------
+# --- Chart colors (validated: node scripts/validate_palette.js) --------
+# Single source for every page's charts. Do not redefine these locally.
+REVENUE_COLOR = "#2a78d6"  # blue: every money-based chart
+ORDERS_COLOR = "#eb6834"  # orange: the one count-based chart
+GRID_COLOR = "#e6e5e0"  # recessive gridlines
+
 CANCELLATION_PREFIX = "C"
 
 NON_PRODUCT_CODES = (

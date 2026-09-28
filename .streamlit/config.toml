@@ -1,0 +1,8 @@
+[theme]
+# Single source for the app's accent color: every checkbox, radio, slider,
+# button and link on every page inherits this. Change it once, here.
+primaryColor = "#2a78d6"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f5f5f2"
+textColor = "#0b0b0b"
+font = "sans serif"

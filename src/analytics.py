@@ -7,7 +7,7 @@ def kpis(df: pd.DataFrame) -> dict:
     """Headline numbers for the KPI row."""
 
     return {
-        "revenue": df["Revenue"].sum(),          # <- dict key can stay lowercase, it's just a label
+        "revenue": df["Revenue"].sum(),
         "orders": df["InvoiceNo"].nunique(),
         "units": df["Quantity"].sum(),
         "customers": df.loc[df["HasCustomer"], "CustomerID"].nunique(),
@@ -58,11 +58,17 @@ def apply_filters(
     countries: list[str] | None = None,
     years: list[int] | None = None,
     months: list[int] | None = None,
+    products: list[str] | None = None,
+    date_range: tuple[pd.Timestamp, pd.Timestamp] | None = None,
 ) -> pd.DataFrame:
-    """Return the rows matching all given filters. Empty/None list = no filter on that field."""
+    """Return the rows matching all given filters. Empty/None = no filter on that field."""
     out = df
+    if date_range:
+        out = out[out["Date"].between(*date_range)]
     if countries:
         out = out[out["Country"].isin(countries)]
+    if products:
+        out = out[out["Product"].isin(products)]
     if years:
         out = out[out["Year"].isin(years)]
     if months:
