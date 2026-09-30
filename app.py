@@ -54,7 +54,7 @@ st.markdown(
 pages = [
     st.Page("views/overview.py", title="Overview", icon="🏠", default=True),
     st.Page("views/sales_analytics.py", title="Sales Analytics", icon="📊"),
+    st.Page("views/sales_forecast.py", title="Sales Forecast", icon="📈"),
 ]
-
 
 st.navigation(pages).run()
