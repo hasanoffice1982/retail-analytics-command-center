@@ -15,10 +15,28 @@ import plotly.graph_objects as go
 st.title("Sales Forecast")
 
 
-@st.cache_data(show_spinner="Tuning SARIMA (144 combinations)...")
+@st.cache_data(show_spinner=False)
 def get_tuning_results(train: pd.Series, test: pd.Series):
     return tune_sarima(train, test)
 
+
+@st.dialog("Verify best model")
+def verify_best_model_dialog(train: pd.Series, test: pd.Series):
+    with st.spinner("Grid-searching 144 SARIMA configurations..."):
+        best_order, best_seasonal_order, best_mape, results_df = get_tuning_results(train, test)
+
+    if best_order == (1, 1, 1) and best_seasonal_order == (1, 1, 1, 7):
+        st.success(f"Confirmed: SARIMA{best_order}{best_seasonal_order} is still the best "
+                   f"of 144 combinations (MAPE {best_mape:.3f}%).")
+    else:
+        st.warning(f"The deployed model is no longer optimal. Best found: "
+                   f"SARIMA{best_order}{best_seasonal_order} (MAPE {best_mape:.3f}%).")
+
+    st.dataframe(
+        results_df.head(10).rename(columns={"mape": "mape (%)"}),
+        hide_index=True,
+        width="stretch",
+    )
 
 df = load_processed()
 daily = aggregate_daily(df)
@@ -83,17 +101,13 @@ st.caption(
     "See docs/forecasting_methodology.md §6 for the full explanation."
 )
 
-with st.expander("Hyperparameter tuning: grid search over 144 SARIMA combinations"):
-    best_order, best_seasonal_order, best_mape, results_df = get_tuning_results(train, test)
-    st.write(
-        f"Best by test-set MAPE: **SARIMA{best_order}{best_seasonal_order}** — "
-        f"{best_mape:.3f}%"
-    )
-    st.dataframe(
-        results_df.head(10).rename(columns={"mape": "mape (%)"}),
-        hide_index=True,
-        width="stretch",
-    )
+st.caption(
+    "Model order confirmed by an exhaustive grid search over 144 SARIMA "
+    "configurations, scored by test-set MAPE — SARIMA(1,1,1)(1,1,1,7) was the "
+    "optimum (20.485%); see docs/forecasting_methodology.md §3.5 for the full comparison."
+)
+if st.button("Verify best model"):
+    verify_best_model_dialog(train, test)
 
 fig = go.Figure()
 
