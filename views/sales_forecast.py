@@ -32,14 +32,14 @@ mape = metrics['mape']
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Model Accuracy (MAPE)", f"{mape:.2f}")
+    st.metric("Model Accuracy (MAPE)", f"{mape:.2f}%")
 
 with col2:
     st.metric("Forecast Horizon", f"{len(test)} days")
 
 
 with col3:
-    next_week_total =- result['forecast'].iloc["7"].sum()
+    next_week_total = result['forecast'].iloc[:7].sum()
     st.metric('Next 7 days Project Revenue', f"£{next_week_total:,.0f}")
 
 fig = go.Figure()
