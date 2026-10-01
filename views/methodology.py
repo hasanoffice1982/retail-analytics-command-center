@@ -92,7 +92,6 @@ with col_d:
 st.caption(
     "MAPE favors SARIMA; MAE (£-weighted) favors the naive baseline — the two "
     "metrics disagree because of one large-revenue day in the test window. "
-    "See docs/forecasting_methodology.md §6 for the full explanation."
 )
 
 st.subheader("Forecast Error Breakdown")
