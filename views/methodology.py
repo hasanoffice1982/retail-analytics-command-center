@@ -16,8 +16,7 @@ from src.forecasting import (
 st.title("Forecasting Methodology")
 st.caption(
     "Validation, error analysis and model selection rationale behind the "
-    "Sales Forecast page. See docs/forecasting_methodology.md for the full "
-    "written methodology."
+    "Sales Forecast page."
 )
 
 
@@ -148,8 +147,7 @@ with st.expander("Why three accuracy numbers?"):
         "entire revenue, and a one-off (that customer placed only one other order "
         "in the whole dataset, worth £2.90). Median and trimmed MAPE show accuracy "
         "on a typical day, excluding that kind of unforecastable event. "
-        "See `docs/forecasting_methodology.md` §4 for the verified transaction-level "
-        "breakdown."
+        
     )
 
 st.divider()
