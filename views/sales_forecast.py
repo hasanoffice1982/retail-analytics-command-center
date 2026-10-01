@@ -17,9 +17,30 @@ df = load_processed()
 daily = aggregate_daily(df)
 train, test = train_test_split_series(daily)
 
+
+
+
+
 model = fit_sarima(train, order=(1, 1, 1), seasonal_order=(1, 1, 1, 7))
 result = forecast_with_ci(model, steps=len(test))
 result["lower"] = result["lower"].clip(lower=0)
+forecast_point = model.forecast(steps=len(test))
+metrics = evaluate_forecast(test, forecast_point)
+mape = metrics['mape']
+
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric("Model Accuracy (MAPE)", f"{mape:.2f}")
+
+with col2:
+    st.metric("Forecast Horizon", f"{len(test)} days")
+
+
+with col3:
+    next_week_total =- result['forecast'].iloc["7"].sum()
+    st.metric('Next 7 days Project Revenue', f"£{next_week_total:,.0f}")
 
 fig = go.Figure()
 
