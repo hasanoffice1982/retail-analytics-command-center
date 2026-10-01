@@ -101,6 +101,38 @@ st.caption(
     "See docs/forecasting_methodology.md §6 for the full explanation."
 )
 
+st.subheader("Forecast Error Breakdown")
+
+error_df = pd.DataFrame({
+    "actual": test.values,
+    "forecast": forecast_point.values,
+    "abs_error": (test.values - forecast_point.values).round(2),
+}, index=test.index)
+# % error is undefined on zero-revenue days (4 Saturdays in this window) —
+# excluded from the ranking rather than shown as a meaningless inf/NaN.
+error_df["abs_pct_error"] = pd.NA
+nonzero = error_df["actual"] != 0
+error_df.loc[nonzero, "abs_pct_error"] = (
+    error_df.loc[nonzero, "abs_error"].abs() / error_df.loc[nonzero, "actual"] * 100
+).round(2)
+
+col_x, col_y = st.columns(2)
+with col_x:
+    st.markdown("**Top 5 by £ error (drives MAE)**")
+    st.dataframe(
+        error_df.sort_values("abs_error", key=abs, ascending=False).head(5),
+        width="stretch",
+    )
+with col_y:
+    st.markdown("**Top 5 by % error (drives MAPE)**")
+    st.dataframe(
+        error_df.dropna(subset=["abs_pct_error"])
+        .sort_values("abs_pct_error", ascending=False)
+        .head(5),
+        width="stretch",
+    )
+st.caption("Zero-revenue days (4 Saturdays in this window) are excluded from the % error ranking — MAPE is undefined there.")
+
 st.caption(
     "Model order confirmed by an exhaustive grid search over 144 SARIMA "
     "configurations, scored by test-set MAPE — SARIMA(1,1,1)(1,1,1,7) was the "
