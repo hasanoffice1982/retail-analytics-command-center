@@ -37,10 +37,44 @@ with col1:
 with col2:
     st.metric("Forecast Horizon", f"{len(test)} days")
 
-
 with col3:
     next_week_total = result['forecast'].iloc[:7].sum()
     st.metric('Next 7 days Project Revenue', f"£{next_week_total:,.0f}")
+
+st.divider()
+st.subheader("Model vs Baseline")
+naive_forecast = seasonal_naive_forecast(train, test, season=7)
+naive_metrics = evaluate_forecast(test, naive_forecast)
+
+col_a, col_b = st.columns(2)
+with col_a:
+    st.metric("SARIMA MAPE", f"{mape:.2f}%")
+with col_b:
+    delta = mape - naive_metrics["mape"]
+    st.metric(
+        "Seasonal Naive MAPE",
+        f"{naive_metrics['mape']:.2f}%",
+        delta=f"{delta:+.2f}pp vs SARIMA",
+        delta_color="inverse",  # red if naive is better than SARIMA
+    )
+
+col_c, col_d = st.columns(2)
+with col_c:
+    st.metric("SARIMA MAE", f"£{metrics['mae']:,.0f}")
+with col_d:
+    mae_delta = metrics["mae"] - naive_metrics["mae"]
+    st.metric(
+        "Seasonal Naive MAE",
+        f"£{naive_metrics['mae']:,.0f}",
+        delta=f"£{mae_delta:+,.0f} vs SARIMA",
+        delta_color="inverse",
+    )
+
+st.caption(
+    "MAPE favors SARIMA; MAE (£-weighted) favors the naive baseline — the two "
+    "metrics disagree because of one large-revenue day in the test window. "
+    "See docs/forecasting_methodology.md §6 for the full explanation."
+)
 
 fig = go.Figure()
 
