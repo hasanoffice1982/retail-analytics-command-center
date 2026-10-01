@@ -56,6 +56,7 @@ pages = [
     st.Page("views/sales_analytics.py", title="Sales Analytics", icon="📊"),
     st.Page("views/sales_forecast.py", title="Sales Forecast", icon="📈"),
     st.Page("views/methodology.py", title="Methodology", icon="🔬"),
+    st.Page("views/stratified_sampling.py", title="Stratified Sampling", icon="🧪"),
 ]
 
 st.navigation(pages).run()
