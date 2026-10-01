@@ -8,10 +8,17 @@ from src.forecasting import (
     forecast_with_ci,
     evaluate_forecast,
     seasonal_naive_forecast,
+    tune_sarima,
 )
 import plotly.graph_objects as go
 
 st.title("Sales Forecast")
+
+
+@st.cache_data(show_spinner="Tuning SARIMA (144 combinations)...")
+def get_tuning_results(train: pd.Series, test: pd.Series):
+    return tune_sarima(train, test)
+
 
 df = load_processed()
 daily = aggregate_daily(df)
@@ -75,6 +82,18 @@ st.caption(
     "metrics disagree because of one large-revenue day in the test window. "
     "See docs/forecasting_methodology.md §6 for the full explanation."
 )
+
+with st.expander("Hyperparameter tuning: grid search over 144 SARIMA combinations"):
+    best_order, best_seasonal_order, best_mape, results_df = get_tuning_results(train, test)
+    st.write(
+        f"Best by test-set MAPE: **SARIMA{best_order}{best_seasonal_order}** — "
+        f"{best_mape:.3f}%"
+    )
+    st.dataframe(
+        results_df.head(10).rename(columns={"mape": "mape (%)"}),
+        hide_index=True,
+        width="stretch",
+    )
 
 fig = go.Figure()
 

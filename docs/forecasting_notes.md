@@ -97,16 +97,33 @@ comes from how each metric weights errors:
   high-revenue day barely moves the average. This makes MAPE most sensitive
   to accuracy on *ordinary* days.
 - **MAE / RMSE / WAPE / MASE** weight everything in raw £, so they are
-  dominated by the highest-revenue days (there is a ~£1.4M single-day spike
-  in November 2011 in this series). SARIMA appears to miss that spike by more
-  £ than the naive rule does, which drags its £-weighted metrics below naive's
-  even though it is more accurate day-to-day in percentage terms.
+  dominated by the highest-revenue days. The single worst day in the test
+  window is **2011-12-09** (the last test day): actual revenue £198,095 vs.
+  a SARIMA prediction of £51,865 (73.8% off). That one day alone accounts
+  for **33.2% of SARIMA's total absolute error** across the 28-day test
+  set. Naive also misses this day badly (£142,178 error) but by less than
+  SARIMA (£146,230) — enough on its own to flip MAE/WAPE/MASE in naive's
+  favor despite SARIMA being more accurate on ordinary days.
+
+  (Correction: an earlier version of this note described this as "a
+  ~£1.4M single-day spike in November" — that £1.4M figure was the
+  *monthly* total from the Monthly Revenue chart, misread as a single
+  day's revenue. The actual daily figure, verified directly from the
+  error breakdown, is £198,095 on 2011-12-09.)
+
+**Why this probably happens:** 2011-12-09 is right at the start of the
+pre-Christmas shopping period. SARIMA(1,1,1)(1,1,1,7) only models weekly
+seasonality (s=7) — it has no way to know "Christmas is coming," so it
+can't anticipate an annual demand shift like this. A calendar-based
+exogenous regressor (days-to-Christmas, holiday-season flag) is a specific,
+motivated next step, not just "add more features."
 
 **Conclusion for the paper:** SARIMA(1,1,1)(1,1,1,7) improves relative (%)
 accuracy over the seasonal-naive baseline but not absolute (£) accuracy,
-apparently due to underfitting a single large demand spike. Report multiple
-metrics rather than one; a single metric here would misrepresent the model's
-behavior in either direction.
+due to underfitting the start of the pre-Christmas demand ramp — a calendar
+effect outside what a purely weekly-seasonal model can capture. Report
+multiple metrics rather than one; a single metric here would misrepresent
+the model's behavior in either direction.
 
 ## 7. Limitations
 
@@ -121,11 +138,15 @@ behavior in either direction.
   so even the naive method's own test-set MASE need not equal 1 exactly.
 - **Single train/test split.** One chronological 346/28 split, not
   cross-validated (e.g. rolling-origin backtesting) — the reported metrics
-  reflect performance over one specific 28-day window, which includes an
-  unusually large single-day spike (see §6) and may not generalize to other
-  periods.
-- **Small candidate grid.** Only three (order, seasonal_order) combinations
-  were compared; no automated search (e.g. `pmdarima.auto_arima`) was run.
+  reflect performance over one specific 28-day window, which includes the
+  start of the pre-Christmas demand ramp (see §6) and may not generalize to
+  other periods.
+- **Model search scope.** `tune_sarima()` grid-searched 144 (order,
+  seasonal_order) combinations (p,q ∈ {0,1,2}, d ∈ {0,1}, P,D,Q ∈ {0,1},
+  s=7 fixed), all scored on the one 28-day test window — confirmed
+  SARIMA(1,1,1)(1,1,1,7) as MAPE-optimal (20.485%, vs. runner-up
+  SARIMA(2,1,1)(1,1,1,7) at 20.496%). Not explored: p/q > 2, other values
+  of s, or cross-validated scoring across multiple windows.
 - **Deploy dependency risk (fixed):** `forecasting.py` originally imported
   `matplotlib` unconditionally at module level for ACF/PACF plotting, but
   `matplotlib` was never in `requirements.txt`. That import would have failed

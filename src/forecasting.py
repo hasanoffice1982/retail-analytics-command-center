@@ -1,3 +1,6 @@
+import itertools
+import warnings
+
 import pandas as pd
 from src.data_loader import load_processed
 from statsmodels.tsa.stattools import adfuller
@@ -131,6 +134,63 @@ def fit_sarima(train: pd.Series, order: tuple, seasonal_order: tuple):
     fitted = model.fit(disp=False)
 
     return fitted
+
+
+def tune_sarima(
+    train: pd.Series,
+    test: pd.Series,
+    p_range: tuple = (0, 1, 2),
+    d_range: tuple = (0, 1),
+    q_range: tuple = (0, 1, 2),
+    seasonal_period: int = 7,
+    seasonal_pdq: tuple = ((0, 1), (0, 1), (0, 1)),
+) -> tuple[tuple, tuple, float, pd.DataFrame]:
+    """
+    Grid search SARIMA (order, seasonal_order) combinations, scored by MAPE
+    on the held-out test set.
+
+    Input:  train/test (chronological split), the (p,d,q) ranges to try,
+            seasonal_period (s, fixed — see check_stationarity/ACF-PACF for
+            why s=7 here), seasonal_pdq (the (P,D,Q) ranges to try).
+    Output: (best_order, best_seasonal_order, best_mape, results_df) — the
+            winning combination plus every combination's (order,
+            seasonal_order, mape, aic), sorted best-first.
+
+    Non-converging combinations are skipped, not raised. Grid size is
+    len(p_range) * len(d_range) * len(q_range) * each seasonal range —
+    the defaults fit 144 models, which takes several minutes; narrow the
+    ranges for a quicker pass.
+    """
+    results = []
+    combos = list(itertools.product(
+        p_range, d_range, q_range,
+        seasonal_pdq[0], seasonal_pdq[1], seasonal_pdq[2],
+    ))
+
+    for p, d, q, P, D, Q in combos:
+        order = (p, d, q)
+        seasonal_order = (P, D, Q, seasonal_period)
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                model = fit_sarima(train, order=order, seasonal_order=seasonal_order)
+                forecast = model.forecast(steps=len(test))
+                metrics = evaluate_forecast(test, forecast)
+            results.append({
+                "order": order,
+                "seasonal_order": seasonal_order,
+                "mape": metrics["mape"],
+                "aic": model.aic,
+            })
+        except Exception:
+            continue  # skip non-converging combos
+
+    if not results:
+        raise RuntimeError("tune_sarima: no (order, seasonal_order) combination converged.")
+
+    results_df = pd.DataFrame(results).sort_values("mape").reset_index(drop=True)
+    best = results_df.iloc[0]
+    return best["order"], best["seasonal_order"], best["mape"], results_df
 
 
 def forecast_with_ci(model, steps: int, alpha: float = 0.05) -> pd.DataFrame:

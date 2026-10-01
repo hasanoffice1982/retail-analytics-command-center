@@ -95,6 +95,14 @@ marginally lower AIC, its BIC — which penalizes additional parameters more
 heavily — was higher, and it produced no meaningful improvement on any
 test-set metric. The more parsimonious model was therefore preferred.
 
+This choice was subsequently validated by an exhaustive grid search over
+$p, q \in \{0,1,2\}$, $d \in \{0,1\}$, $P, D, Q \in \{0,1\}$ (144
+(order, seasonal_order) combinations, $s = 7$ fixed), each fit on the
+training set and scored by test-set MAPE. SARIMA(1,1,1)(1,1,1,7) was
+confirmed as the MAPE-optimal combination (20.485%) of the 144 evaluated;
+SARIMA(2,1,1)(1,1,1,7) was the runner-up (20.496%), consistent with the
+three-candidate comparison above.
+
 ### 3.6 Evaluation Metrics
 
 Forecast accuracy was assessed using five metrics, defined for actual
@@ -136,12 +144,22 @@ weights errors across days of varying revenue magnitude. MAPE averages
 day the same as a proportionally large miss on a high-revenue day; it is
 therefore most sensitive to typical-day accuracy. MAE, RMSE, WAPE, and MASE
 average or scale *absolute* (£) errors, and are therefore dominated by
-high-magnitude days. The test window contains one day with an
-approximately £1.4M revenue spike — an order of magnitude above the
-window's typical daily revenue. The SARIMA model's absolute error on this
-day exceeds the naive model's, which is sufficient to reverse the ranking
+high-magnitude days.
+
+A single day drives this reversal: 2011-12-09, the final day of the test
+window, recorded actual revenue of £198,095 against a SARIMA prediction of
+£51,865 (73.8% relative error). This one day accounts for 33.2% of
+SARIMA's total absolute error across the entire 28-day test set. The naive
+baseline also misses this day substantially (£142,178 absolute error), but
+by less than SARIMA (£146,230), which is sufficient to reverse the ranking
 under every magnitude-weighted metric despite SARIMA's better performance
-on the remaining, typical days.
+on the remaining, typical days. 2011-12-09 falls at the start of the
+pre-Christmas shopping period; SARIMA(1,1,1)(1,1,1,7) models only
+weekly seasonality (s = 7) and has no mechanism to anticipate an annual,
+calendar-driven demand shift of this kind. This points to the inclusion of
+calendar-based exogenous regressors (e.g., days-to-Christmas, a holiday-
+season indicator) as a specific, motivated direction for future model
+improvement (Section 5).
 
 ## 5. Limitations
 
@@ -159,9 +177,11 @@ on the remaining, typical days.
    split rather than a cross-validated (e.g., rolling-origin) evaluation.
    The test window's inclusion of an atypical high-revenue day (Section 4)
    may limit generalizability of the reported metrics to other periods.
-4. **Limited model search.** Three (order, seasonal_order) SARIMA
-   specifications were compared manually; an automated search over a wider
-   parameter space was not performed.
+4. **Model search scope.** The grid search (Section 3.5) covered
+   $p, q \in \{0,1,2\}$, $d \in \{0,1\}$, $P, D, Q \in \{0,1\}$ with $s = 7$
+   fixed — 144 combinations, all scored on a single test window (see
+   Limitation 3). Higher-order values ($p, q > 2$), alternative values of
+   $s$, and a cross-validated scoring scheme were not explored.
 5. **Holiday attribution unverified.** The classification of non-Saturday
    zero-revenue days as likely holidays (Section 2) was inferred from the
    calendar dates involved and was not cross-checked against an official UK
