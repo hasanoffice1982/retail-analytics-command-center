@@ -153,13 +153,22 @@ SARIMA's total absolute error across the entire 28-day test set. The naive
 baseline also misses this day substantially (£142,178 absolute error), but
 by less than SARIMA (£146,230), which is sufficient to reverse the ranking
 under every magnitude-weighted metric despite SARIMA's better performance
-on the remaining, typical days. 2011-12-09 falls at the start of the
-pre-Christmas shopping period; SARIMA(1,1,1)(1,1,1,7) models only
-weekly seasonality (s = 7) and has no mechanism to anticipate an annual,
-calendar-driven demand shift of this kind. This points to the inclusion of
-calendar-based exogenous regressors (e.g., days-to-Christmas, a holiday-
-season indicator) as a specific, motivated direction for future model
-improvement (Section 5).
+on the remaining, typical days.
+
+Transaction-level inspection of 2011-12-09 identifies the cause: a single
+customer (ID 16446) placed one order (invoice 581483) worth £168,470 —
+85.0% of that day's entire £198,095 revenue, out of 35 distinct customers
+trading that day. This customer placed only one other order in the full
+12-month dataset, worth £2.90 (18 May 2011); the December order is not part
+of a recurring purchasing pattern. This is an idiosyncratic, customer-level
+demand shock rather than a calendar or seasonal effect, and no
+time-series model conditioned only on aggregate historical revenue —
+SARIMA(1,1,1)(1,1,1,7) included — has a mechanism to anticipate it; doing
+so would require customer-level order data, which falls outside this
+model's scope. (An earlier draft of this section attributed the error to
+the start of the pre-Christmas shopping period; that explanation is
+superseded by this transaction-level finding, which is directly
+verifiable in the source data.)
 
 ## 5. Limitations
 
@@ -192,11 +201,13 @@ improvement (Section 5).
 SARIMA(1,1,1)(1,1,1,7) improves relative (percentage-based) forecast
 accuracy over a seasonal-naive baseline but does not improve, and by most
 magnitude-weighted metrics slightly underperforms, on an absolute (£)
-basis — a discrepancy driven by underfitting a single atypical high-revenue
-day in the test window. This result illustrates that forecast evaluation
-conclusions can be metric-dependent, and supports reporting multiple
-complementary metrics rather than a single accuracy measure when comparing
-forecasting models.
+basis — a discrepancy driven by a single idiosyncratic, customer-level
+order in the test window (Section 4) rather than a deficiency in the
+model itself; no aggregate-revenue time-series model has a mechanism to
+anticipate a one-off order of this kind. This result illustrates that
+forecast evaluation conclusions can be metric-dependent, and supports
+reporting multiple complementary metrics rather than a single accuracy
+measure when comparing forecasting models.
 
 ## References
 

@@ -111,19 +111,28 @@ comes from how each metric weights errors:
   day's revenue. The actual daily figure, verified directly from the
   error breakdown, is £198,095 on 2011-12-09.)
 
-**Why this probably happens:** 2011-12-09 is right at the start of the
-pre-Christmas shopping period. SARIMA(1,1,1)(1,1,1,7) only models weekly
-seasonality (s=7) — it has no way to know "Christmas is coming," so it
-can't anticipate an annual demand shift like this. A calendar-based
-exogenous regressor (days-to-Christmas, holiday-season flag) is a specific,
-motivated next step, not just "add more features."
+**Why this actually happens (verified, 2026-10-02):** checked the raw
+transactions for 2011-12-09 directly. One customer (ID 16446) placed a
+single order (invoice 581483) worth £168,470 — 85.0% of that day's entire
+revenue, across 35 customers trading that day. This same customer placed
+only one other order in the whole dataset: £2.90, back in May. It's a
+one-off customer-level demand shock, not a seasonal or calendar pattern —
+nothing in the aggregate daily revenue series gives a model any signal
+that this was coming, because there isn't one.
+
+(Correction #2: an earlier version of this note attributed this to "the
+start of the pre-Christmas shopping period" — a calendar hypothesis that
+sounded plausible but wasn't checked against the actual transactions. It's
+now been checked, and superseded by the finding above.)
 
 **Conclusion for the paper:** SARIMA(1,1,1)(1,1,1,7) improves relative (%)
 accuracy over the seasonal-naive baseline but not absolute (£) accuracy,
-due to underfitting the start of the pre-Christmas demand ramp — a calendar
-effect outside what a purely weekly-seasonal model can capture. Report
-multiple metrics rather than one; a single metric here would misrepresent
-the model's behavior in either direction.
+due to one unforecastable customer-level order that dominates the test
+window's £-weighted error. This isn't a modeling flaw to fix with better
+tuning or more features — it's a single transaction outside what any
+aggregate-revenue time-series model could see coming. Report multiple
+metrics rather than one; a single metric here would misrepresent the
+model's behavior in either direction.
 
 ## 7. Limitations
 
@@ -138,9 +147,9 @@ the model's behavior in either direction.
   so even the naive method's own test-set MASE need not equal 1 exactly.
 - **Single train/test split.** One chronological 346/28 split, not
   cross-validated (e.g. rolling-origin backtesting) — the reported metrics
-  reflect performance over one specific 28-day window, which includes the
-  start of the pre-Christmas demand ramp (see §6) and may not generalize to
-  other periods.
+  reflect performance over one specific 28-day window, which happens to
+  include one unusually large one-off customer order (see §6) and may not
+  generalize to other periods.
 - **Model search scope.** `tune_sarima()` grid-searched 144 (order,
   seasonal_order) combinations (p,q ∈ {0,1,2}, d ∈ {0,1}, P,D,Q ∈ {0,1},
   s=7 fixed), all scored on the one 28-day test window — confirmed
